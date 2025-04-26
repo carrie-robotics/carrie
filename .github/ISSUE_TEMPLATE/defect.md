@@ -1,14 +1,14 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Defect
+about: Report something that probably didn't work before but impedes functionality
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the defect**
+A clear and concise description of what the defect is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
