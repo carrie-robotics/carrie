@@ -43,6 +43,3 @@ ros2 launch carrie_gz carrie_gz.launch.py world_name:=empty.sdf
 <p align="center"> <img src="docs/carrie_gazebo.png" alt="rviz carrie" width="1000"/> </p>
 
 <p align="center"> <img src="docs/carrie_rviz.png" alt="rviz carrie" width="1000"/> </p>
-
-
-
