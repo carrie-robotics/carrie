@@ -1,5 +1,5 @@
 # carrie_gz
-Caontains launch files for launching Carrie robot inside a Gazebo and RViz simulation
+Contains launch files for launching Carrie robot inside a Gazebo and RViz simulation
 
 ## 📂 Directories
 - `config` defines a list of topics and message types to be bridged between ROS2 and Gazebo
