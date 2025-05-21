@@ -9,6 +9,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, TextSubstitution
 from launch_ros.actions import Node, PushRosNamespace, SetRemap
 
+from nav2_common.launch import ParseMultiRobotPose
+
 from carrie_gz.launch_tools.substitutions import TextJoin
 
 
@@ -19,7 +21,7 @@ def generate_launch_description():
         'ros_bridge', default_value='True', description='Run ROS bridge node.')
     rviz_arg = DeclareLaunchArgument('rviz', default_value='True', description='Start RViz.')
     world_name_arg = DeclareLaunchArgument(
-        'world_name', default_value='depot.sdf', description='Name of the world to load.')
+        'world_name', default_value='empty.sdf', description='Name of the world to load.')
     robots_arg = DeclareLaunchArgument(
         'robots', default_value="carrie={x: 0., y: 0., z: 0.1, yaw: 0.};",
         description='Robots to spawn, multiple robots can be stated separated by a ; ')
@@ -74,8 +76,14 @@ def generate_launch_description():
         ]
     )
 
+    robots_list = ParseMultiRobotPose('robots').value()
+    # When no robots are specified, spawn a single robot at the origin.
+    # The default value isn't getting parsed correctly because ParseMultiRobotPose checks sys.args
+    # instead of using launch argument.
     log_robots_by_user = LogInfo(msg="Robots provided by user.")
-    robots_list = {"carrie": {"x": 0., "y": 0., "z": 0.1, "yaw": 0.}}
+    if (robots_list == {}):
+        log_robots_by_user = LogInfo(msg="No robots provided, using default:")
+        robots_list = {"andino": {"x": 0., "y": 0., "z": 0.1, "yaw": 0.}}
     log_number_robots = LogInfo(msg="Robots to spawn: " + str(robots_list))
     spawn_robots_group = []
     more_than_one_robot = PythonExpression([TextSubstitution(text=str(len(robots_list.keys()))), ' > 1'])
