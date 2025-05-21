@@ -5,7 +5,7 @@
   <description>Launch Gazebo simulation with carrie robot</description>
   <author email="laibazahid26@gmail.com">Laiba Zahid</author>
   <maintainer email="laibazahid26@gmail.com">Laiba Zahid</maintainer>
-  <license file="LICENSE">BSD Clause 3</license>
+  <license file="LICENSE">MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
