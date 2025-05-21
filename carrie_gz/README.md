@@ -10,9 +10,9 @@ Contains launch files for launching Carrie robot inside a Gazebo and RViz simula
 - `worlds` different worlds for carrie to be spawned in 
 
 
-## 🥃🧊🍒 View Carrie in Gazebo
+## 🤖 View Carrie in Gazebo
 
-Setup:
+### Setup:
 ```shell
 sudo apt update
 ```
@@ -26,18 +26,22 @@ rosdep update
 rosdep install --from-paths src -y --ignore-src
 ```
 
-Build the package
+### Build the package:
 ```shell
 colcon build --symlink-install
 ```
-Launch Gazebo
+### Launch Gazebo (with RViz)
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py
 ```
 
-If you want to launch Carrie into an empty world
+### Launch Gazebo (without RViz and ros bridge)
 ```shell
-ros2 launch carrie_gz carrie_gz.launch.py world_name:=empty.sdf
+ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False rviz:=False
+```
+You can see the available parameters for the launch file:
+```shell
+ros2 launch carrie_gz carrie_gz.launch.py --show-args
 ```
 
 <p align="center"> <img src="docs/carrie_gazebo.png" alt="rviz carrie" width="1000"/> </p>
