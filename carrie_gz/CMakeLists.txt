@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.28.3)
 project(carrie_gz)
-
-find_package(gazebo QUIET)
 
 find_package(ament_cmake REQUIRED)
 
