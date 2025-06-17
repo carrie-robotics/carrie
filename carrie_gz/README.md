@@ -38,7 +38,7 @@ You can see the available parameters for the launch file:
 ros2 launch carrie_gz carrie_gz.launch.py --show-args
 ```
 
-### Launching more than one robots
+### Launching more than one robots 🤖 🤖 🤖
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False rviz:=False robots:="
     carrie1={x: 0.0, y: 0.0, z: 0.1, yaw: 0.};
