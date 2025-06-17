@@ -9,26 +9,12 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from xacro import process_file
 
-PKG_CARRIE_DESCRIPTION = get_package_share_directory('carrie_description')
-PKG_CARRIE_GZ = get_package_share_directory('carrie_gz')
-
 
 def get_robot_description() -> str:
-    """
-    Obtain the URDF from the xacro file.
+    
+    PKG_CARRIE_DESCRIPTION = get_package_share_directory('carrie_description')
+    PKG_CARRIE_GZ = get_package_share_directory('carrie_gz')
 
-    This replace package tag by file tag to works with gazebo
-    # See  https://github.com/ros-simulation/gazebo_ros_pkgs/pull/1284
-
-    Considerations: the URDF model of the robot will be set with certain
-    presets:
-    - use_fixed_caster: false
-
-    Returns
-    -------
-        URDF of the robot with gazebo data
-
-    """
     # Parse robot description from xacro
     robot_description_file_path = os.path.join(PKG_CARRIE_GZ, 'urdf', 'carrie_gz.urdf.xacro')
     mappings = {'use_fixed_caster': 'false'}
