@@ -16,7 +16,7 @@ def generate_launch_description():
     robot_ns_arg = DeclareLaunchArgument(
         "robot_ns",
         default_value="",
-        description="Namespace to used, typically is the name of the robot when more than one Andino is launched.",
+        description="Namespace to used, typically is the name of the robot when more than one carrie is launched.",
     )
     return LaunchDescription(
         [
