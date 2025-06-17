@@ -105,7 +105,7 @@ def generate_launch_description():
                 # Spawn the robot and the Robot State Publisher node.
                 IncludeLaunchDescription(
                     PythonLaunchDescriptionSource(
-                        os.path.join(pkg_carrie_gz, 'launch', 'include', 'spawn_robot.launch.py')
+                        os.path.join(pkg_carrie_gz, 'launch', 'spawn_robot.launch.py')
                     ),
                     launch_arguments={
                         'entity': robot_name,
@@ -139,7 +139,7 @@ def generate_launch_description():
                 # Run ros_gz bridge
                 IncludeLaunchDescription(
                     PythonLaunchDescriptionSource(
-                        os.path.join(pkg_carrie_gz, 'launch', 'include', 'gz_ros_bridge.launch.py')
+                        os.path.join(pkg_carrie_gz, 'launch', 'gz_ros_bridge.launch.py')
                     ),
                     launch_arguments={
                         'entity': robot_name,
