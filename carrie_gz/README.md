@@ -10,22 +10,7 @@ Contains launch files for launching Carrie robot inside a Gazebo and RViz simula
 - `worlds` different worlds for carrie to be spawned in 
 
 
-## 🤖 View Carrie in Gazebo
-
-### Setup:
-```shell
-sudo apt update
-```
-```shell
-sudo apt upgrade
-```
-```shell
-rosdep update
-```
-```shell
-rosdep install --from-paths src -y --ignore-src
-```
-
+## 🤖 Launch Carrie in Gazebo
 ### Build the package:
 ```shell
 colcon build --symlink-install
@@ -34,6 +19,9 @@ colcon build --symlink-install
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py
 ```
+<p align="center"> <img src="docs/carrie_gazebo_empty_world.png" alt="rviz carrie" width="1000"/> </p>
+
+<p align="center"> <img src="docs/carrie_rviz.png" alt="rviz carrie" width="1000"/> </p>
 
 ### Launch Gazebo (without RViz and ros bridge)
 ```shell
@@ -50,9 +38,4 @@ ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False rviz:=False robots:=
     carrie1={x: 0.0, y: 0.0, z: 0.1, yaw: 0.};
     carrie2={x: 1.0, y: 1.0, z: 0.1, yaw: 0.};"
 ```
-
-<p align="center"> <img src="docs/carrie_gazebo_empty_world.png" alt="rviz carrie" width="1000"/> </p>
-
-<p align="center"> <img src="docs/carrie_rviz.png" alt="rviz carrie" width="1000"/> </p>
-
 <p align="center"> <img src="docs/carrie_robots_gazebo.png" alt="rviz carrie" width="1000"/> </p>
