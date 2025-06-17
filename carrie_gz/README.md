@@ -23,6 +23,12 @@ ros2 launch carrie_gz carrie_gz.launch.py
 
 <p align="center"> <img src="docs/carrie_rviz.png" alt="rviz carrie" width="1000"/> </p>
 
+### Launch Gazebo (with Robot State Publisher)
+If you are seeing the error in RViz that says "No transform from l_wheel_link to base_link" or "No transform from r_wheel_link to base_link" please launch the RViz with the robot state publisher node
+```shell
+ros2 launch carrie_gz carrie_gz.launch.py rsp:=True
+```
+
 ### Launch Gazebo (without RViz and ros bridge)
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False rviz:=False
