@@ -29,6 +29,7 @@ def generate_launch_description():
         'gui_config',
         default_value='default.config',
         description='Name of the gui configuration file to load.')
+    robot_state_publisher_arg = DeclareLaunchArgument('rsp', default_value='False', description='Start Robot State Publisher')
 
     # Variables of launch file.
     rviz = LaunchConfiguration('rviz')
@@ -36,6 +37,7 @@ def generate_launch_description():
     world_name = LaunchConfiguration('world_name')
     gui_config = LaunchConfiguration('gui_config')
     gui_config_path = PathJoinSubstitution([pkg_carrie_gz, 'config_gui', gui_config])
+    rsp = LaunchConfiguration('rsp')
 
     # Obtains world path.
     world_path = PathJoinSubstitution([pkg_carrie_gz, 'worlds', world_name])
@@ -96,6 +98,7 @@ def generate_launch_description():
             launch_configurations={
                 'rviz': rviz,
                 'ros_bridge': ros_bridge,
+                'rsp': rsp,
             },
             actions=[
                 LogInfo(msg="Group for robot: " + robot_name),
@@ -131,6 +134,7 @@ def generate_launch_description():
                 ),
                 # joint_state_publisher_gui
                 Node(
+                    condition=IfCondition(PythonExpression([rsp])),
                     package='joint_state_publisher_gui',
                     executable='joint_state_publisher_gui',
                     name='joint_state_publisher_gui',
@@ -159,6 +163,7 @@ def generate_launch_description():
     ld.add_action(world_name_arg)
     ld.add_action(robots_arg)
     ld.add_action(gui_config_arg)
+    ld.add_action(robot_state_publisher_arg)
     ld.add_action(log_world_path)
     ld.add_action(base_group)
     for group in spawn_robots_group:
