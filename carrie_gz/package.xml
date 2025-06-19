@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>carrie_gz</name>
+  <version>0.1.1</version>
+  <description>Launch Gazebo simulation with carrie robot</description>
+  <author email="laibazahid26@gmail.com">Laiba Zahid</author>
+  <maintainer email="laibazahid26@gmail.com">Laiba Zahid</maintainer>
+  <license file="LICENSE">MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>carrie_description</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>nav2_common</exec_depend> 
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
