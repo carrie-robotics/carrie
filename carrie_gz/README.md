@@ -35,6 +35,7 @@ If you are seeing the error in RViz that says "No transform from l_wheel_link to
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py rsp:=True rviz:=True
 ```
+<p align="center"> <img src="docs/carrie_rviz_rsp.png" alt="rviz carrie" width="1000"/> </p>
 
 ### Launching more than one robots 🤖 🤖 🤖
 ```shell
