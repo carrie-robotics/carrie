@@ -24,7 +24,7 @@ You will see the terminal log confirming the activation of the gazebo server.
 
 ### Launch Gazebo (with gazebo gui and RViz) 
 ```shell
-ros2 launch carrie_gz carrie_gz.launch.py gazebo:=True rviz:=True
+ros2 launch carrie_gz carrie_gz.launch.py gazebo_headless:=False rviz:=True
 ```
 <p align="center"> <img src="docs/carrie_gazebo_empty_world.png" alt="rviz carrie" width="1000"/> </p>
 
@@ -33,12 +33,12 @@ ros2 launch carrie_gz carrie_gz.launch.py gazebo:=True rviz:=True
 ### Launch Gazebo (with Robot State Publisher)
 If you are seeing the error in RViz that says "No transform from l_wheel_link to base_link" or "No transform from r_wheel_link to base_link" please launch the RViz with the robot state publisher node
 ```shell
-ros2 launch carrie_gz carrie_gz.launch.py rsp:=True
+ros2 launch carrie_gz carrie_gz.launch.py rsp:=True rviz:=True
 ```
 
 ### Launching more than one robots 🤖 🤖 🤖
 ```shell
-ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False gazebo:=True robots:="
+ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False gazebo_headless:=False robots:="
     carrie1={x: 0.0, y: 0.0, z: 0.1, yaw: 0.};
     carrie2={x: 1.0, y: 1.0, z: 0.1, yaw: 0.};"
 ```
