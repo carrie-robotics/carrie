@@ -111,6 +111,10 @@ def generate_launch_description():
             '-Y', initial_pose_yaw,
         ],
         output='screen',
+        sigterm_timeout='1',
+        sigkill_timeout='1',
+        emulate_tty=True,
+        name='gazebo',
     )
 
     return LaunchDescription(
