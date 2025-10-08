@@ -4,7 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription, LogInfo
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression, TextSubstitution
 from launch_ros.actions import Node, PushRosNamespace, SetRemap
@@ -19,7 +19,7 @@ def generate_launch_description():
 
     ros_bridge_arg = DeclareLaunchArgument(
         'ros_bridge', default_value='True', description='Run ROS bridge node.')
-    rviz_arg = DeclareLaunchArgument('rviz', default_value='True', description='Start RViz.')
+    rviz_arg = DeclareLaunchArgument('rviz', default_value='False', description='Start RViz.')
     world_name_arg = DeclareLaunchArgument(
         'world_name', default_value='empty.sdf', description='Name of the world to load.')
     robots_arg = DeclareLaunchArgument(
@@ -30,6 +30,8 @@ def generate_launch_description():
         default_value='default.config',
         description='Name of the gui configuration file to load.')
     robot_state_publisher_arg = DeclareLaunchArgument('rsp', default_value='False', description='Start Robot State Publisher')
+    gazebo_gui_arg = DeclareLaunchArgument(
+        'gazebo_headless', default_value='True', description='Launch Gazebo with GUI (false) or headless (true).')
 
     # Variables of launch file.
     rviz = LaunchConfiguration('rviz')
@@ -38,7 +40,8 @@ def generate_launch_description():
     gui_config = LaunchConfiguration('gui_config')
     gui_config_path = PathJoinSubstitution([pkg_carrie_gz, 'config_gui', gui_config])
     rsp = LaunchConfiguration('rsp')
-
+    gazebo_headless = LaunchConfiguration('gazebo_headless')
+    
     # Obtains world path.
     world_path = PathJoinSubstitution([pkg_carrie_gz, 'worlds', world_name])
     log_world_path = LogInfo(msg=TextJoin(substitutions=["World path: ", world_path]))
@@ -57,15 +60,26 @@ def generate_launch_description():
             'ros_bridge': ros_bridge,
             'world_name': world_name,
             'gui_config': gui_config,
+            'gazebo_headless': gazebo_headless,
         },
         actions=[
-            # Gazebo Sim
+            # Gazebo Sim + Server
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
                 ),
+                condition=UnlessCondition(LaunchConfiguration('gazebo_headless')),
                 launch_arguments={'gz_args': gz_args}.items(),
             ),
+
+            # Gazebo Server
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_server.launch.py')
+                ),
+                launch_arguments={'world_sdf_file': world_name}.items(),
+            ),
+            
             # ROS Bridge for generic Gazebo stuff
             Node(
                 package='ros_gz_bridge',
@@ -164,6 +178,7 @@ def generate_launch_description():
     ld.add_action(robots_arg)
     ld.add_action(gui_config_arg)
     ld.add_action(robot_state_publisher_arg)
+    ld.add_action(gazebo_gui_arg)
     ld.add_action(log_world_path)
     ld.add_action(base_group)
     for group in spawn_robots_group:

@@ -15,9 +15,16 @@ Contains launch files for launching Carrie robot inside a Gazebo and RViz simula
 ```shell
 colcon build --symlink-install
 ```
-### Launch Gazebo (with RViz)
+### Launch Gazebo (without gazebo gui and RViz)
+The default behavior of the launch file is to start the Gazebo server without its GUI and without launching RViz. 
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py
+```
+You will see the terminal log confirming the activation of the gazebo server. 
+
+### Launch Gazebo (with gazebo gui and RViz) 
+```shell
+ros2 launch carrie_gz carrie_gz.launch.py gazebo_headless:=False rviz:=True
 ```
 <p align="center"> <img src="docs/carrie_gazebo_empty_world.png" alt="rviz carrie" width="1000"/> </p>
 
@@ -26,21 +33,13 @@ ros2 launch carrie_gz carrie_gz.launch.py
 ### Launch Gazebo (with Robot State Publisher)
 If you are seeing the error in RViz that says "No transform from l_wheel_link to base_link" or "No transform from r_wheel_link to base_link" please launch the RViz with the robot state publisher node
 ```shell
-ros2 launch carrie_gz carrie_gz.launch.py rsp:=True
+ros2 launch carrie_gz carrie_gz.launch.py rsp:=True rviz:=True
 ```
-
-### Launch Gazebo (without RViz and ros bridge)
-```shell
-ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False rviz:=False
-```
-You can see the available parameters for the launch file:
-```shell
-ros2 launch carrie_gz carrie_gz.launch.py --show-args
-```
+<p align="center"> <img src="docs/carrie_rviz_rsp.png" alt="rviz carrie" width="1000"/> </p>
 
 ### Launching more than one robots 🤖 🤖 🤖
 ```shell
-ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False rviz:=False robots:="
+ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False gazebo_headless:=False robots:="
     carrie1={x: 0.0, y: 0.0, z: 0.1, yaw: 0.};
     carrie2={x: 1.0, y: 1.0, z: 0.1, yaw: 0.};"
 ```
