@@ -22,7 +22,7 @@ ros2 launch carrie_gz carrie_gz.launch.py
 ```
 You will see the terminal log confirming the activation of the gazebo server. 
 
-### Launch Gazebo (with gazebo gui and RViz) 
+### Launch Gazebo (with gazebo gui and RViz)
 ```shell
 ros2 launch carrie_gz carrie_gz.launch.py gazebo_headless:=False rviz:=True
 ```
