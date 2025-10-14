@@ -4,8 +4,8 @@
   <version>0.2.0</version>
   <description>The carrie_control package</description>
 
-  <author email="laibazahid26@gmail.com">Franco Cipollone</author>
-  <maintainer email="laibazahid26@gmail.com">Franco Cipollone</maintainer>
+  <author email="laibazahid26@gmail.com">Laiba Zahid</author>
+  <maintainer email="laibazahid26@gmail.com">Laiba Zahid</maintainer>
   <license file="LICENSE">MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -20,7 +20,7 @@
   <exec_depend>diff_drive_controller</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
-  
+
   <exec_depend>ros2controlcli</exec_depend>
   <exec_depend>topic_tools</exec_depend>
 
