@@ -31,6 +31,8 @@ ros2 launch carrie_gz carrie_gz.launch.py rviz:=True gazebo_headless:=False
 ```
 You will see the terminal log confirming the activation of the gazebo server. 
 
+**Note:** Ignore the error on RViz in the `Robot Model` widget. It will go away once you launch the controllers (next step!). 
+
 ### Launch the Control launch file 
 ```shell
 ros2 launch carrie_control carrie_control.launch.py
