@@ -2,7 +2,8 @@
 <package format="3">
   <name>carrie_control</name>
   <version>0.2.0</version>
-  <description>The carrie_control package</description>
+  <description> manages the communication between controllers and the 
+                simulated hardware in Gazebo</description>
 
   <author email="laibazahid26@gmail.com">Laiba Zahid</author>
   <maintainer email="laibazahid26@gmail.com">Laiba Zahid</maintainer>
