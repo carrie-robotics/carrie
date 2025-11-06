@@ -1,0 +1,61 @@
+[workspace]
+name = "carrie"
+version = "0.1.0"
+description = "Building a mobile manipulator based on a Fetch Mobile Manipulator chassis"
+authors = ["Griswald Brooks <griswald.brooks@gmail.com>"]
+channels = ["conda-forge", "robostack-jazzy"]
+platforms = ["linux-64"]
+
+[tasks]
+build = "colcon build --symlink-install"
+clean = "rm -rf build install log"
+test = "colcon test"
+view-carrie = { cmd = "bash -c 'source install/setup.bash && ros2 launch carrie_description view_carrie.launch.py'", depends-on = ["build"] }
+sim-headless = { cmd = "bash -c 'source install/setup.bash && ros2 launch carrie_gz carrie_gz.launch.py'", depends-on = ["build"] }
+sim-gui = { cmd = "bash -c 'source install/setup.bash && ros2 launch carrie_gz carrie_gz.launch.py gazebo_headless:=False rviz:=True'", depends-on = ["build"] }
+sim-rsp = { cmd = "bash -c 'source install/setup.bash && ros2 launch carrie_gz carrie_gz.launch.py rsp:=True rviz:=True'", depends-on = ["build"] }
+sim-multi = { cmd = "bash -c 'source install/setup.bash && ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False gazebo_headless:=False robots=\"carrie1={x: 0.0, y: 0.0, z: 0.1, yaw: 0.}; carrie2={x: 1.0, y: 1.0, z: 0.1, yaw: 0.};\"'", depends-on = ["build"] }
+
+[dependencies]
+# ROS 2 Jazzy core
+ros-jazzy-ros-base = "*"
+ros-jazzy-ament-cmake = "*"
+ros-jazzy-ament-cmake-python = "*"
+
+# ROS 2 Jazzy packages for carrie_description
+ros-jazzy-joint-state-publisher = "*"
+ros-jazzy-robot-state-publisher = "*"
+ros-jazzy-rviz2 = "*"
+ros-jazzy-xacro = "*"
+
+# ROS 2 Jazzy packages for carrie_gz
+ros-jazzy-joint-state-publisher-gui = "*"
+ros-jazzy-nav2-common = "*"
+ros-jazzy-ros-gz-bridge = "*"
+ros-jazzy-ros-gz-sim = "*"
+
+# Build tools
+cmake = ">=3.22"
+colcon-common-extensions = "*"
+ccache = "*"
+
+# Development tools
+clang = "*"
+clang-format = "*"
+clang-tools = "*"
+git = "*"
+git-lfs = "*"
+neovim = "*"
+pre-commit = "*"
+
+# Python
+python = ">=3.10"
+pip = "*"
+
+[feature.dev.dependencies]
+# Additional development dependencies
+gdb = "*"
+valgrind = "*"
+
+[environments]
+default = ["dev"]

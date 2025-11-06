@@ -41,7 +41,7 @@ def generate_launch_description():
     gui_config_path = PathJoinSubstitution([pkg_carrie_gz, 'config_gui', gui_config])
     rsp = LaunchConfiguration('rsp')
     gazebo_headless = LaunchConfiguration('gazebo_headless')
-    
+
     # Obtains world path.
     world_path = PathJoinSubstitution([pkg_carrie_gz, 'worlds', world_name])
     log_world_path = LogInfo(msg=TextJoin(substitutions=["World path: ", world_path]))
@@ -79,7 +79,7 @@ def generate_launch_description():
                 ),
                 launch_arguments={'world_sdf_file': world_name}.items(),
             ),
-            
+
             # ROS Bridge for generic Gazebo stuff
             Node(
                 package='ros_gz_bridge',
