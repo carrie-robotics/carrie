@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>carrie_control</name>
+  <version>0.2.0</version>
+  <description> manages the communication between controllers and the 
+                simulated hardware in Gazebo</description>
+
+  <author email="laibazahid26@gmail.com">Laiba Zahid</author>
+  <maintainer email="laibazahid26@gmail.com">Laiba Zahid</maintainer>
+  <license file="LICENSE">MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>carrie_description</exec_depend>
+  <!-- ros2_control core -->
+  <exec_depend>ros2_control</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <!-- Common controller plugins -->
+  <exec_depend>ros2_controllers</exec_depend>
+  <exec_depend>diff_drive_controller</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+
+  <exec_depend>ros2controlcli</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+
+  <test_depend>ament_cmake_clang_format</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
