@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'sam3_detection = carrie_perception.sam3_node:main',
+            'test_publisher = carrie_perception.test_publisher:main',
         ],
     },
 )
