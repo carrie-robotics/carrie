@@ -1,5 +1,9 @@
 sam3_detector:
   ros__parameters:
-    prompt: "woman"
     threshold: 0.5
     mask_threshold: 0.5
+
+image_publisher:
+  ros__parameters:
+    image_path: "carrie_perception/example_images/solvay_conference_1927.jpg"
+    prompt: "woman"
