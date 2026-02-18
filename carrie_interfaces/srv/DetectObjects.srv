@@ -1,0 +1,7 @@
+sensor_msgs/Image image
+string prompt
+---
+vision_msgs/Detection2DArray detections
+sensor_msgs/Image mask
+bool success
+string message
