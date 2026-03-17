@@ -2,11 +2,10 @@
 
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
-from vision_msgs.msg import Detection2DArray, Detection2D, ObjectHypothesisWithPose
+from vision_msgs.msg import BoundingBox2D
 from cv_bridge import CvBridge
 from transformers import Sam3Model, Sam3Processor
-from PIL import Image as PILImage
+import cv2
 import torch
 import numpy as np
 import os
@@ -23,15 +22,20 @@ class Sam3Detector(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('threshold', 0.5),
+                ('confidence_threshold', 0.5),
                 ('mask_threshold', 0.5),
             ])
 
-        self.threshold = self.get_parameter('threshold').value
+        self.confidence_threshold = self.get_parameter('confidence_threshold').value
         self.mask_threshold = self.get_parameter('mask_threshold').value
 
         # device
-        self.device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        elif torch.backends.mps.is_available():
+            self.device = torch.device('mps')
+        else:
+            self.device = torch.device('cpu')
         self.get_logger().info(f'Using device: {self.device}')
 
         # load model
@@ -48,16 +52,18 @@ class Sam3Detector(Node):
         self.get_logger().info('SAM3 detector service ready')
 
     def detect_callback(self, request: DetectObjects.Request, response: DetectObjects.Response):
-        prompt = request.prompt if request.prompt else 'person'
+        prompt = request.prompt
+        if not request.prompt:
+            response.success = False
+            response.message = "No prompt provided"
+            return response
 
         try:
-            # convert ROS image -> PIL
             cv_image = self.bridge.imgmsg_to_cv2(request.image, desired_encoding='rgb8')
-            pil_image = PILImage.fromarray(cv_image)
 
             # preprocess
             inputs = self.processor(
-                images=pil_image,
+                images=cv_image,
                 text=prompt,
                 return_tensors='pt'
             ).to(self.device)
@@ -66,40 +72,29 @@ class Sam3Detector(Node):
             with torch.no_grad():
                 outputs = self.model(**inputs)
 
+            h, w = cv_image.shape[:2]
             results = self.processor.post_process_instance_segmentation(
                 outputs,
-                threshold=self.threshold,
+                threshold=self.confidence_threshold,
                 mask_threshold=self.mask_threshold,
-                target_sizes=[pil_image.size[::-1]]
+                target_sizes=[(h, w)]
             )[0]
 
-            # build Detection2DArray
-            detections_msg = Detection2DArray()
-            detections_msg.header = request.image.header
-
+            # build flat boxes + scores lists
+            boxes = []
+            scores = []
             for i, score in enumerate(results["scores"]):
-                det = Detection2D()
-                det.header = request.image.header
+                box_data = results["boxes"][i]
 
-                box = results["boxes"][i]
+                bbox = BoundingBox2D()
+                bbox.center.position.x = float((box_data[0] + box_data[2]) / 2.0)
+                bbox.center.position.y = float((box_data[1] + box_data[3]) / 2.0)
+                bbox.center.theta = 0.0
+                bbox.size_x = float(box_data[2] - box_data[0])
+                bbox.size_y = float(box_data[3] - box_data[1])
 
-                cx = float((box[0] + box[2]) / 2.0)
-                cy = float((box[1] + box[3]) / 2.0)
-                w  = float(box[2] - box[0])
-                h  = float(box[3] - box[1])
-
-                det.bbox.center.position.x = cx
-                det.bbox.center.position.y = cy
-                det.bbox.center.theta = 0.0
-                det.bbox.size_x = w
-                det.bbox.size_y = h
-
-                hyp = ObjectHypothesisWithPose()
-                hyp.hypothesis.class_id = prompt
-                hyp.hypothesis.score = float(score)
-                det.results.append(hyp)
-
-                detections_msg.detections.append(det)
+                boxes.append(bbox)
+                scores.append(float(score))
 
             # build combined mask
             masks = results["masks"].cpu().numpy().astype(np.uint8) * 255
@@ -107,9 +102,7 @@ class Sam3Detector(Node):
             if masks.shape[0] > 0:
                 combined_mask = np.max(masks, axis=0)
             else:
-                combined_mask = np.zeros(
-                    (pil_image.size[1], pil_image.size[0]), dtype=np.uint8
-                )
+                combined_mask = np.zeros((h, w), dtype=np.uint8)
 
             mask_msg = self.bridge.cv2_to_imgmsg(combined_mask, encoding='mono8')
             mask_msg.header = request.image.header
@@ -123,19 +116,23 @@ class Sam3Detector(Node):
                 }
 
                 detections = helper_functions.from_sam(sam_result=sam_result_for_helper)
-                detections = detections[detections.confidence > self.threshold]
+                detections = detections[detections.confidence > self.confidence_threshold]
 
                 if len(detections) > 0:
-                    annotated = helper_functions.annotate(pil_image, detections, label=prompt)
+                    annotated = helper_functions.annotate(cv_image, detections, label=prompt)
                     output_path = os.path.join("carrie_perception/sam3_output", "annotated_output.jpg")
-                    annotated.save(output_path)
+                    cv2.imwrite(output_path, cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR))
                     self.get_logger().info(f"Saved annotated debug image to {output_path}")
                     self.output_saved = True
 
-            response.detections = detections_msg
+            # populate response
+            response.header = request.image.header
+            response.prompt = prompt
+            response.boxes = boxes
+            response.scores = scores
             response.mask = mask_msg
             response.success = True
-            response.message = f"Detected {len(detections_msg.detections)} object(s)"
+            response.message = f"Detected {len(boxes)} object(s)"
             self.get_logger().info(response.message)
 
         except Exception as e:
