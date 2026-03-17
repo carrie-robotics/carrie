@@ -1,7 +1,12 @@
+# Request
 sensor_msgs/Image image
 string prompt
 ---
-vision_msgs/Detection2DArray detections
+# Response
+std_msgs/Header header
+string prompt
+vision_msgs/BoundingBox2D[] boxes      # one per detection
+float32[] scores                       # parallel to bounding boxes
 sensor_msgs/Image mask
 bool success
 string message
