@@ -13,6 +13,40 @@ import os
 from carrie_perception import helper_functions
 from carrie_interfaces.srv import DetectObjects
 
+def get_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        return torch.device('mps')
+    else:
+        return torch.device('cpu')
+
+def build_bounding_boxes(results : dict) -> tuple[list[BoundingBox2D], list[float]]:
+    # build flat boxes + scores lists
+    boxes = []
+    scores = []
+    for i, score in enumerate(results["scores"]):
+        box_data = results["boxes"][i]
+
+        bbox = BoundingBox2D()
+        bbox.center.position.x = float((box_data[0] + box_data[2]) / 2.0)
+        bbox.center.position.y = float((box_data[1] + box_data[3]) / 2.0)
+        bbox.center.theta = 0.0
+        bbox.size_x = float(box_data[2] - box_data[0])
+        bbox.size_y = float(box_data[3] - box_data[1])
+
+        boxes.append(bbox)
+        scores.append(float(score))
+
+    return boxes, scores
+
+def combined_mask(masks: np.ndarray, h: int, w: int) -> np.ndarray:
+    if masks.shape[0] > 0:
+        combined_mask = np.max(masks, axis=0)
+    else:
+        combined_mask = np.zeros((h, w), dtype=np.uint8)
+    
+    return combined_mask
 
 class Sam3Detector(Node):
     def __init__(self):
@@ -29,15 +63,9 @@ class Sam3Detector(Node):
         self.confidence_threshold = self.get_parameter('confidence_threshold').value
         self.mask_threshold = self.get_parameter('mask_threshold').value
 
-        # device
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda')
-        elif torch.backends.mps.is_available():
-            self.device = torch.device('mps')
-        else:
-            self.device = torch.device('cpu')
+        self.device = get_device()
         self.get_logger().info(f'Using device: {self.device}')
-
+        
         # load model
         self.model = Sam3Model.from_pretrained("facebook/sam3").to(self.device)
         self.processor = Sam3Processor.from_pretrained("facebook/sam3")
@@ -62,11 +90,7 @@ class Sam3Detector(Node):
             cv_image = self.bridge.imgmsg_to_cv2(request.image, desired_encoding='rgb8')
 
             # preprocess
-            inputs = self.processor(
-                images=cv_image,
-                text=prompt,
-                return_tensors='pt'
-            ).to(self.device)
+            inputs = self.processor(images=cv_image, text=prompt, return_tensors='pt').to(self.device)
 
             # inference
             with torch.no_grad():
@@ -80,31 +104,12 @@ class Sam3Detector(Node):
                 target_sizes=[(h, w)]
             )[0]
 
-            # build flat boxes + scores lists
-            boxes = []
-            scores = []
-            for i, score in enumerate(results["scores"]):
-                box_data = results["boxes"][i]
+            boxes, scores = build_bounding_boxes(results)
 
-                bbox = BoundingBox2D()
-                bbox.center.position.x = float((box_data[0] + box_data[2]) / 2.0)
-                bbox.center.position.y = float((box_data[1] + box_data[3]) / 2.0)
-                bbox.center.theta = 0.0
-                bbox.size_x = float(box_data[2] - box_data[0])
-                bbox.size_y = float(box_data[3] - box_data[1])
-
-                boxes.append(bbox)
-                scores.append(float(score))
-
-            # build combined mask
             masks = results["masks"].cpu().numpy().astype(np.uint8) * 255
+            combined_mask_img = combined_mask(masks, h, w)
 
-            if masks.shape[0] > 0:
-                combined_mask = np.max(masks, axis=0)
-            else:
-                combined_mask = np.zeros((h, w), dtype=np.uint8)
-
-            mask_msg = self.bridge.cv2_to_imgmsg(combined_mask, encoding='mono8')
+            mask_msg = self.bridge.cv2_to_imgmsg(combined_mask_img, encoding='mono8')
             mask_msg.header = request.image.header
 
             # for debugging and demo purposes (should be deleted later)
