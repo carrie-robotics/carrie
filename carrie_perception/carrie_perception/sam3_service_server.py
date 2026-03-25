@@ -5,12 +5,9 @@ from rclpy.node import Node
 from vision_msgs.msg import BoundingBox2D
 from cv_bridge import CvBridge
 from transformers import Sam3Model, Sam3Processor
-import cv2
 import torch
 import numpy as np
-import os
 
-from carrie_perception import helper_functions
 from carrie_interfaces.srv import DetectObjects
 
 def get_device() -> torch.device:
@@ -72,10 +69,6 @@ class Sam3Detector(Node):
         self.bridge = CvBridge()
 
         self.srv = self.create_service(DetectObjects, 'detect_objects', self.detect_callback)
-
-        self.output_saved = False
-        os.makedirs("carrie_perception/sam3_output", exist_ok=True)
-
         self.get_logger().info('SAM3 detector service ready')
 
     def detect_callback(self, request: DetectObjects.Request, response: DetectObjects.Response):
@@ -105,24 +98,6 @@ class Sam3Detector(Node):
 
             boxes, scores = build_bounding_boxes(results)
             mask_msgs = build_mask_messages(results["masks"], request.image.header, self.bridge)
-
-            # for debugging and demo purposes (should be deleted later)
-            if not self.output_saved:
-                sam_result_for_helper = {
-                    "masks": results["masks"].cpu(),
-                    "scores": results["scores"].cpu(),
-                    "boxes": results["boxes"].cpu() if "boxes" in results else None,
-                }
-
-                detections = helper_functions.from_sam(sam_result=sam_result_for_helper)
-                detections = detections[detections.confidence > self.confidence_threshold]
-
-                if len(detections) > 0:
-                    annotated = helper_functions.annotate(cv_image, detections, label=prompt)
-                    output_path = os.path.join("carrie_perception/sam3_output", "annotated_output.jpg")
-                    cv2.imwrite(output_path, cv2.cvtColor(annotated, cv2.COLOR_RGB2BGR))
-                    self.get_logger().info(f"Saved annotated debug image to {output_path}")
-                    self.output_saved = True
 
             # populate response
             response.header = request.image.header
