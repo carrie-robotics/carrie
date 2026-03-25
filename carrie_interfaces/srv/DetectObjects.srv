@@ -5,8 +5,8 @@ string prompt
 # Response
 std_msgs/Header header
 string prompt
-vision_msgs/BoundingBox2D[] boxes      # one per detection
-float32[] scores                       # parallel to bounding boxes
-sensor_msgs/Image mask
+vision_msgs/BoundingBox2D[] boxes
+float32[] scores
+sensor_msgs/Image[] masks
 bool success
-string message
+string error_message
