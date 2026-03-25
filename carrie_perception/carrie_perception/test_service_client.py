@@ -64,9 +64,9 @@ class ImagePublisher(Node):
         try:
             response = future.result()
             if response.success:
-                self.get_logger().info(f'Service response: {response.message}')
+                self.get_logger().info(f'Detection succeeded')
             else:
-                self.get_logger().error(f'Service failed: {response.message}')
+                self.get_logger().error(f'Service failed: {response.error_message}')
         except Exception as e:
             self.get_logger().error(f'Service call raised exception: {e}')
 
