@@ -2,12 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
-
-from sensor_msgs.msg import Image
+import cv2
 from cv_bridge import CvBridge
-
-from PIL import Image as PILImage
-import numpy as np
 import os
 
 from carrie_interfaces.srv import DetectObjects
@@ -37,8 +33,8 @@ class ImagePublisher(Node):
             rclpy.shutdown()
             return
 
-        pil_image = PILImage.open(self.image_path).convert('RGB')
-        cv_image = np.array(pil_image)
+        cv_image = cv2.imread(self.image_path)
+        cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
         self.image_msg = self.bridge.cv2_to_imgmsg(cv_image, encoding='rgb8')
         self.image_msg.header.frame_id = 'camera'
