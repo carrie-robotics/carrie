@@ -1,6 +1,6 @@
 sam3_detector:
   ros__parameters:
-    threshold: 0.5
+    confidence_threshold: 0.5
     mask_threshold: 0.5
 
 image_publisher:
