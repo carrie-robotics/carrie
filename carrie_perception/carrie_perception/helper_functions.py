@@ -57,8 +57,9 @@ COLOR = sv.ColorPalette.from_hex([
 ])
 
 
-def annotate(image: Image.Image, detections: sv.Detections, label: Optional[str] = None) -> Image.Image:
-    text_scale = sv.calculate_optimal_text_scale(resolution_wh=image.size)
+def annotate(image: np.ndarray, detections: sv.Detections, label: Optional[str] = None) -> np.ndarray:
+    h, w = image.shape[:2]
+    text_scale = sv.calculate_optimal_text_scale(resolution_wh=(w, h))
 
     mask_annotator = sv.MaskAnnotator(
         color=COLOR,
