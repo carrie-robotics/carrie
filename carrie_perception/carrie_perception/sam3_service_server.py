@@ -21,8 +21,7 @@ def get_device() -> torch.device:
     else:
         return torch.device('cpu')
 
-def build_bounding_boxes(results : dict) -> tuple[list[BoundingBox2D], list[float]]:
-    # build flat boxes + scores lists
+def build_bounding_boxes(results: dict) -> tuple[list[BoundingBox2D], list[float]]:
     boxes = []
     scores = []
     for i, score in enumerate(results["scores"]):
@@ -40,13 +39,13 @@ def build_bounding_boxes(results : dict) -> tuple[list[BoundingBox2D], list[floa
 
     return boxes, scores
 
-def combined_mask(masks: np.ndarray, h: int, w: int) -> np.ndarray:
-    if masks.shape[0] > 0:
-        combined_mask = np.max(masks, axis=0)
-    else:
-        combined_mask = np.zeros((h, w), dtype=np.uint8)
-    
-    return combined_mask
+def build_mask_messages(masks: np.ndarray, header, bridge: CvBridge) -> list:
+    mask_msgs = []
+    for mask in masks.cpu().numpy().astype(np.uint8) * 255:
+        mask_msg = bridge.cv2_to_imgmsg(mask, encoding='mono8')
+        mask_msg.header = header
+        mask_msgs.append(mask_msg)
+    return mask_msgs
 
 class Sam3Detector(Node):
     def __init__(self):
@@ -65,7 +64,7 @@ class Sam3Detector(Node):
 
         self.device = get_device()
         self.get_logger().info(f'Using device: {self.device}')
-        
+
         # load model
         self.model = Sam3Model.from_pretrained("facebook/sam3").to(self.device)
         self.processor = Sam3Processor.from_pretrained("facebook/sam3")
@@ -83,7 +82,7 @@ class Sam3Detector(Node):
         prompt = request.prompt
         if not request.prompt:
             response.success = False
-            response.message = "No prompt provided"
+            response.error_message = "No prompt provided"
             return response
 
         try:
@@ -105,12 +104,7 @@ class Sam3Detector(Node):
             )[0]
 
             boxes, scores = build_bounding_boxes(results)
-
-            masks = results["masks"].cpu().numpy().astype(np.uint8) * 255
-            combined_mask_img = combined_mask(masks, h, w)
-
-            mask_msg = self.bridge.cv2_to_imgmsg(combined_mask_img, encoding='mono8')
-            mask_msg.header = request.image.header
+            mask_msgs = build_mask_messages(results["masks"], request.image.header, self.bridge)
 
             # for debugging and demo purposes (should be deleted later)
             if not self.output_saved:
@@ -135,15 +129,15 @@ class Sam3Detector(Node):
             response.prompt = prompt
             response.boxes = boxes
             response.scores = scores
-            response.mask = mask_msg
+            response.masks = mask_msgs
             response.success = True
-            response.message = f"Detected {len(boxes)} object(s)"
-            self.get_logger().info(response.message)
+            response.error_message = ""
+            self.get_logger().info(f"Detected {len(boxes)} object(s)")
 
         except Exception as e:
             self.get_logger().error(f"Detection failed: {e}")
             response.success = False
-            response.message = str(e)
+            response.error_message = str(e)
 
         return response
 
