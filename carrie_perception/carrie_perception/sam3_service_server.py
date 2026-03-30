@@ -10,6 +10,7 @@ import numpy as np
 
 from carrie_interfaces.srv import DetectObjects
 
+
 def get_device() -> torch.device:
     if torch.cuda.is_available():
         return torch.device('cuda')
@@ -18,37 +19,51 @@ def get_device() -> torch.device:
     else:
         return torch.device('cpu')
 
+
+def xyxy_to_cwh(box) -> tuple[float, float, float, float]:
+    cx = float((box[0] + box[2]) / 2.0)
+    cy = float((box[1] + box[3]) / 2.0)
+    w  = float(box[2] - box[0])
+    h  = float(box[3] - box[1])
+    return cx, cy, w, h
+
+
+def masks_to_images(masks: torch.Tensor) -> list[np.ndarray]:
+    return [mask for mask in masks.cpu().numpy().astype(np.uint8) * 255]
+
+
 def build_bounding_boxes(results: dict) -> tuple[list[BoundingBox2D], list[float]]:
     boxes = []
     scores = []
     for i, score in enumerate(results["scores"]):
-        box_data = results["boxes"][i]
+        cx, cy, w, h = xyxy_to_cwh(results["boxes"][i])
 
         bbox = BoundingBox2D()
-        bbox.center.position.x = float((box_data[0] + box_data[2]) / 2.0)
-        bbox.center.position.y = float((box_data[1] + box_data[3]) / 2.0)
+        bbox.center.position.x = cx
+        bbox.center.position.y = cy
         bbox.center.theta = 0.0
-        bbox.size_x = float(box_data[2] - box_data[0])
-        bbox.size_y = float(box_data[3] - box_data[1])
+        bbox.size_x = w
+        bbox.size_y = h
 
         boxes.append(bbox)
         scores.append(float(score))
 
     return boxes, scores
 
-def build_mask_messages(masks: np.ndarray, header, bridge: CvBridge) -> list:
+
+def build_mask_messages(masks: torch.Tensor, header, bridge: CvBridge) -> list:
     mask_msgs = []
-    for mask in masks.cpu().numpy().astype(np.uint8) * 255:
-        mask_msg = bridge.cv2_to_imgmsg(mask, encoding='mono8')
+    for mask_img in masks_to_images(masks):
+        mask_msg = bridge.cv2_to_imgmsg(mask_img, encoding='mono8')
         mask_msg.header = header
         mask_msgs.append(mask_msg)
     return mask_msgs
+
 
 class Sam3Detector(Node):
     def __init__(self):
         super().__init__('sam3_detector')
 
-        # parameters
         self.declare_parameters(
             namespace='',
             parameters=[
@@ -62,7 +77,6 @@ class Sam3Detector(Node):
         self.device = get_device()
         self.get_logger().info(f'Using device: {self.device}')
 
-        # load model
         self.model = Sam3Model.from_pretrained("facebook/sam3").to(self.device)
         self.processor = Sam3Processor.from_pretrained("facebook/sam3")
 
@@ -73,7 +87,7 @@ class Sam3Detector(Node):
 
     def detect_callback(self, request: DetectObjects.Request, response: DetectObjects.Response):
         prompt = request.prompt
-        if not request.prompt:
+        if not prompt:
             response.success = False
             response.error_message = "No prompt provided"
             return response
@@ -81,10 +95,8 @@ class Sam3Detector(Node):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(request.image, desired_encoding='rgb8')
 
-            # preprocess
             inputs = self.processor(images=cv_image, text=prompt, return_tensors='pt').to(self.device)
 
-            # inference
             with torch.no_grad():
                 outputs = self.model(**inputs)
 
@@ -99,7 +111,6 @@ class Sam3Detector(Node):
             boxes, scores = build_bounding_boxes(results)
             mask_msgs = build_mask_messages(results["masks"], request.image.header, self.bridge)
 
-            # populate response
             response.header = request.image.header
             response.prompt = prompt
             response.boxes = boxes
