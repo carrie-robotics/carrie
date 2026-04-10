@@ -17,6 +17,7 @@ sim-rsp = { cmd = "bash -c 'source install/setup.bash && ros2 launch carrie_gz c
 sim-headless-multi = { cmd = "bash -c 'source install/setup.bash && source pixi_params.sh && ros2 launch carrie_gz carrie_gz.launch.py ros_bridge:=False robots:=\"$ROBOTS\"'", depends-on = ["build"]}
 sam3-detection-server = {cmd = "bash -c 'source install/setup.bash && ros2 run carrie_perception sam3_detection_server --ros-args --params-file carrie_perception/config/sam3_params.yaml'", depends-on = ["build"]}
 sam3-client = {cmd = "bash -c 'source install/setup.bash && ros2 run carrie_perception test_client --ros-args --params-file carrie_perception/config/sam3_params.yaml'", depends-on = ["build"]}
+unit-tests = {cmd = "bash -c 'source install/setup.bash && python -m pytest carrie_perception/test/test_sam3_service_server.py -v '", depends-on = ["build"]}
 
 [dependencies]
 # ROS2 Jazzy core
