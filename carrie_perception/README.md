@@ -39,3 +39,9 @@ Following is an example of how the output will look like. A folder called as `sa
 The `prompt` is set to `woman` in `config/sam3_params.yaml` file. Change this parameter to play with the segmentation results.
 
 <p align="center"> <img src="docs/result_solvay_conference.png" alt="rviz carrie" width="1000"/> </p>
+
+## Run Unit Tests
+You can run the unit tests by
+```shell
+pixi run unit-tests
+```
