@@ -1,0 +1,12 @@
+# Request
+sensor_msgs/Image image
+string prompt
+---
+# Response
+std_msgs/Header header
+string prompt
+vision_msgs/BoundingBox2D[] boxes
+float32[] scores
+sensor_msgs/Image[] masks
+bool success
+string error_message
